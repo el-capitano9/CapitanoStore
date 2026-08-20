@@ -4,7 +4,7 @@ const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { Telegraf } = require('telegraf');
+const { Telegraf, session } = require('telegraf');
 const axios = require('axios');
 
 // ======== إعدادات البيئة ========
@@ -12,7 +12,7 @@ const ADMIN_BOT_TOKEN = process.env.ADMIN_BOT_TOKEN || '8874334419:AAFqjEpoE2W-E
 const USER_BOT_TOKEN = process.env.USER_BOT_TOKEN || '8994191558:AAFeIW-3G1PnEoxoLDVPE1dtiKImsPDQq8c';
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '8243764053';
 const PORT = process.env.PORT || 3000;
-const SITE_URL = process.env.SITE_URL || 'https://capitanostore.up.railway.app';
+const BASE_URL = process.env.BASE_URL || 'https://capitanostore.up.railway.app'; // غير الرابط ده لما الموقع يشتغل
 
 // ======== بوت الأدمن ========
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN);
@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ======== دالة إرسال الطلب للأدمن ========
-async function sendOrderToAdmin(game, pack, price, accountId, note, filePath, source = 'الموقع') {
+async function sendOrderToAdmin(game, pack, price, accountId, notes, filePath, source = 'الموقع') {
   try {
     const caption = `🛍️ طلب شحن جديد (${source})
 ━━━━━━━━━━━━━━━
@@ -45,7 +45,7 @@ async function sendOrderToAdmin(game, pack, price, accountId, note, filePath, so
 📦 الباقة: ${pack}
 💰 السعر: ${price} ج.م
 🆔 الحساب: ${accountId}
-${note ? `📝 ملاحظات: ${note}` : ''}
+📝 ملاحظات: ${notes || 'لا يوجد'}
 ⏰ الوقت: ${new Date().toLocaleString('ar-EG')}
 ━━━━━━━━━━━━━━━
 📌 رقم التحويل: 01036732010 (فودافون كاش)`;
@@ -65,14 +65,14 @@ ${note ? `📝 ملاحظات: ${note}` : ''}
 
 // ======== نقطة استقبال الطلبات من الموقع ========
 app.post('/api/submit', upload.single('screenshot'), async (req, res) => {
-  const { game, pack, price, account_id, note } = req.body;
+  const { game, pack, price, account_id, notes } = req.body;
   const file = req.file;
 
   if (!file) {
     return res.status(400).json({ success: false, message: '⚠️ لازم ترفع السكرين شوت!' });
   }
   if (!account_id || account_id.trim() === '') {
-    return res.status(400).json({ success: false, message: '⚠️ لازم تكتب الـ ID أو اليوزرنيم!' });
+    return res.status(400).json({ success: false, message: '⚠️ لازم تكتب الـ ID!' });
   }
 
   const sent = await sendOrderToAdmin(
@@ -80,7 +80,7 @@ app.post('/api/submit', upload.single('screenshot'), async (req, res) => {
     pack,
     price,
     account_id,
-    note || '',
+    notes,
     file.path,
     '🌐 الموقع الإلكتروني'
   );
@@ -88,206 +88,137 @@ app.post('/api/submit', upload.single('screenshot'), async (req, res) => {
   try { fs.unlinkSync(file.path); } catch(e) {}
 
   if (sent) {
-    res.json({ success: true, message: `✅ تم استلام طلب ${game} بنجاح! هنتواصل معاك قريباً.` });
+    res.json({ success: true, message: `✅ تم استلام طلب ${game} بنجاح!` });
   } else {
-    res.status(500).json({ success: false, message: '❌ عطل في الإرسال، جرب تاني أو تواصل مع الدعم.' });
+    res.status(500).json({ success: false, message: '❌ عطل في الإرسال، جرب تاني.' });
   }
 });
 
-// ======== بوت الخدمة (معدل بالكامل) ========
+// ======== بوت الخدمة (العميل) ========
 const userBot = new Telegraf(USER_BOT_TOKEN);
+userBot.use(session());
 
+// بيانات الألعاب (مختصرة للبوت)
 const GAMES_DATA = {
-  'PUBG': {
-    icon: '🎮',
-    packs: [
-      { label: '60 UC', price: 55 },
-      { label: '300+25 UC', price: 245 },
-      { label: '600+60 UC', price: 485 },
-      { label: '1500+300 UC', price: 1210 }
-    ],
-    field: '🆔 الـ ID الخاص بك'
-  },
-  'FC Mobile': {
-    icon: '⚽',
-    packs: [
-      { label: '40+8 Points', price: 30 },
-      { label: '100+20 Points', price: 70 },
-      { label: '520+104 Points', price: 270 },
-      { label: '1070+214 Points', price: 520 }
-    ],
-    field: '🆔 الـ ID الخاص بك'
-  },
-  'Call of Duty': {
-    icon: '🔫',
-    packs: [
-      { label: '30 CP', price: 30 },
-      { label: '80 CP', price: 55 },
-      { label: '420 CP', price: 260 },
-      { label: '880 CP', price: 510 }
-    ],
-    field: '🆔 الـ ID الخاص بك'
-  },
-  'Blood Strike MAX': {
-    icon: '🧛',
-    packs: [
-      { label: '50+1 Golds', price: 30 },
-      { label: '100+5 Golds', price: 55 },
-      { label: '300+20 Golds', price: 150 },
-      { label: '500+40 Golds', price: 240 },
-      { label: '1000+100 Golds', price: 470 }
-    ],
-    field: '🆔 الـ ID الخاص بك'
-  },
-  'Free Fire': {
-    icon: '🔥',
-    packs: [
-      { label: '100 D', price: 65 },
-      { label: '210 D', price: 120 },
-      { label: '530 D', price: 280 },
-      { label: '1080 D', price: 555 }
-    ],
-    field: '🆔 الـ ID الخاص بك'
-  },
-  'Telegram Stars': {
-    icon: '⭐',
-    packs: [
-      { label: '75 Stars', price: 80 },
-      { label: '100 Stars', price: 115 },
-      { label: '150 Stars', price: 155 },
-      { label: '250 Stars', price: 250 },
-      { label: '350 Stars', price: 335 },
-      { label: '500 Stars', price: 470 },
-      { label: '750 Stars', price: 700 },
-      { label: 'Premium 3 Months', price: 745 }
-    ],
-    field: '👤 اليوزرنيم (Username)'
-  }
+  'PUBG': { packs: [{ label: '60 UC', price: 55 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }] },
+  'FC Mobile': { packs: [{ label: '40+8 Points', price: 30 }, { label: '100+20 Points', price: 70 }, { label: '520+104 Points', price: 270 }, { label: '1070+214 Points', price: 520 }] },
+  'Call of Duty': { packs: [{ label: '30 CP', price: 30 }, { label: '80 CP', price: 55 }, { label: '420 CP', price: 260 }, { label: '880 CP', price: 510 }] },
+  'Blood Strike MAX': { packs: [{ label: '50+1 Golds', price: 30 }, { label: '100+5 Golds', price: 55 }, { label: '300+20 Golds', price: 150 }, { label: '500+40 Golds', price: 240 }, { label: '1000+100 Golds', price: 470 }] },
+  'Free Fire': { packs: [{ label: '100 D', price: 65 }, { label: '210 D', price: 120 }, { label: '530 D', price: 280 }, { label: '1080 D', price: 555 }] },
+  'Telegram Stars': { packs: [{ label: '75 Stars', price: 80 }, { label: '100 Stars', price: 115 }, { label: '150 Stars', price: 155 }, { label: '250 Stars', price: 250 }, { label: '350 Stars', price: 335 }, { label: '500 Stars', price: 470 }, { label: '750 Stars', price: 700 }, { label: 'Premium 3 Months', price: 745 }] }
 };
 
+// دالة عرض الألعاب
 const gamesKeyboard = () => {
   const buttons = Object.keys(GAMES_DATA).map(game => {
-    const icon = GAMES_DATA[game].icon;
-    return [{ text: `${icon} ${game}`, callback_data: `game_${game}` }];
+    return [{ text: `🎮 ${game}`, callback_data: `game_${game}` }];
   });
+  buttons.push([{ text: '🔗 افتح الموقع', url: BASE_URL }]);
   return { inline_keyboard: buttons };
 };
 
+// دالة عرض الباقات
 const packsKeyboard = (gameKey) => {
   const game = GAMES_DATA[gameKey];
   const buttons = game.packs.map(pack => {
     return [{ text: `${pack.label} (${pack.price} ج.م)`, callback_data: `pack_${gameKey}_${pack.label}_${pack.price}` }];
   });
-  buttons.push([{ text: '🔙 رجوع للقائمة الرئيسية', callback_data: 'back_home' }]);
-  buttons.push([{ text: '🌐 زيارة الموقع', url: SITE_URL }]);
+  buttons.push([{ text: '🔙 رجوع', callback_data: 'back_home' }]);
   return { inline_keyboard: buttons };
 };
 
+// أمر /start
 userBot.start(async (ctx) => {
   ctx.session = {};
   await ctx.reply(
-    `🔥 مرحباً بك في *Capitano Store*! 🏴‍☠️
-أقوى متجر شحن للألعاب ونجوم تيليجرام.
+    `🔥 مرحباً بك في *Capitano Store*!
+أقوى متجر شحن للألعاب.
 
 📌 اختر اللعبة من الأزرار:`,
     { parse_mode: 'Markdown', reply_markup: gamesKeyboard() }
   );
 });
 
+// اختيار اللعبة
 userBot.action(/game_(.*)/, async (ctx) => {
   const gameKey = ctx.match[1];
   ctx.session.game = gameKey;
   await ctx.answerCbQuery();
   await ctx.reply(
     `✅ اخترت: *${gameKey}*
-الآن اختر الباقة المناسبة:`,
+اختر الباقة:`,
     { parse_mode: 'Markdown', reply_markup: packsKeyboard(gameKey) }
   );
 });
 
+// اختيار الباقة
 userBot.action(/pack_(.*)_(.*)_(.*)/, async (ctx) => {
-  const gameKey = ctx.match[1];
-  const packLabel = ctx.match[2];
-  const packPrice = ctx.match[3];
-  
-  ctx.session.pack = packLabel;
-  ctx.session.price = packPrice;
-  
+  ctx.session.pack = ctx.match[2];
+  ctx.session.price = ctx.match[3];
   await ctx.answerCbQuery();
-  
-  const fieldLabel = GAMES_DATA[gameKey].field;
   await ctx.reply(
-    `💰 اخترت باقة *${packLabel}* بسعر *${packPrice}* ج.م.
-📝 من فضلك اكتب ${fieldLabel} في رسالة منفصلة.
-(مثال: 123456789 أو @username)
-
-📌 رقم التحويل: *01036732010* (فودافون كاش)`,
+    `💰 اخترت باقة *${ctx.session.pack}* بسعر *${ctx.session.price}* ج.م.
+📝 اكتب الـ ID أو اليوزرنيم في رسالة منفصلة.
+(ممكن تكتب ملاحظاتك معاه)`,
     { parse_mode: 'Markdown' }
   );
   ctx.session.step = 'waiting_id';
 });
 
+// رجوع
 userBot.action('back_home', async (ctx) => {
   ctx.session = {};
   await ctx.answerCbQuery();
-  await ctx.reply('🔙 رجعت للقائمة الرئيسية:', { reply_markup: gamesKeyboard() });
+  await ctx.reply('🔙 رجعت للقائمة:', { reply_markup: gamesKeyboard() });
 });
 
+// استقبال النصوص (ID + ملاحظات)
 userBot.on('text', async (ctx) => {
-  const text = ctx.message.text;
-  if (text.startsWith('/')) return;
-
   if (ctx.session.step === 'waiting_id') {
-    if (!text || text.trim() === '') {
-      return ctx.reply('⚠️ من فضلك اكتب الـ ID أو اليوزرنيم بشكل صحيح.');
-    }
-    ctx.session.account_id = text.trim();
+    ctx.session.account_id = ctx.message.text;
     ctx.session.step = 'waiting_screenshot';
-    
     await ctx.reply(
       `📸 خطوة أخيرة:
-1️⃣ حول المبلغ *${ctx.session.price}* ج.م على رقم فودافون كاش: *01036732010*
-2️⃣ اضغط على أيقونة 📎 (المشبك) وارفع صورة التحويل.
+1️⃣ حول المبلغ *${ctx.session.price}* ج.م على فودافون كاش: *01036732010*
+2️⃣ ارفع صورة التحويل.
 
-⚠️ تأكد أن الصورة واضحة وتظهر المبلغ والرقم المحول منه.`,
+⚠️ تأكد من ظهور المبلغ والرقم.`,
       { parse_mode: 'Markdown' }
     );
   } else {
-    await ctx.reply('⚠️ استخدم الأزرار للتنقل، أو اكتب /start');
+    await ctx.reply('استخدم الأزرار أو اكتب /start');
   }
 });
 
+// استقبال الصور
 userBot.on('photo', async (ctx) => {
   if (ctx.session.step !== 'waiting_screenshot') {
-    return ctx.reply('⚠️ من فضلك ابدأ طلب جديد بـ /start أولاً.');
+    return ctx.reply('⚠️ ابدأ طلب جديد بـ /start');
   }
 
   const photo = ctx.message.photo[ctx.message.photo.length - 1];
   const fileLink = await ctx.telegram.getFileLink(photo.file_id);
-  
   const response = await axios({ url: fileLink.href, responseType: 'stream' });
   const tempPath = `./uploads/temp_${Date.now()}.jpg`;
   const writer = fs.createWriteStream(tempPath);
   response.data.pipe(writer);
-  await new Promise((resolve, reject) => { writer.on('finish', resolve); writer.on('error', reject); });
+  await new Promise((resolve) => writer.on('finish', resolve));
 
-  const sent = await sendOrderToAdmin(
+  await sendOrderToAdmin(
     ctx.session.game,
     ctx.session.pack,
     ctx.session.price,
     ctx.session.account_id,
-    '',
+    'تم الإرسال عبر البوت',
     tempPath,
     '🤖 بوت التليجرام'
   );
 
   try { fs.unlinkSync(tempPath); } catch(e) {}
 
-  if (sent) {
-    await ctx.reply('✅ تم استلام طلبك بنجاح! هنتواصل معاك قريباً على هذا الشات.');
-  } else {
-    await ctx.reply('❌ حدث عطل في الإرسال، حاول تاني أو استخدم الموقع الإلكتروني.');
-  }
+  await ctx.reply('✅ تم استلام طلبك بنجاح! هنتواصل معاك قريباً.', { 
+    reply_markup: { inline_keyboard: [[{ text: '🔗 افتح الموقع', url: BASE_URL }]] } 
+  });
   ctx.session = {};
 });
 
@@ -296,7 +227,7 @@ app.listen(PORT, () => {
   console.log(`🌐 موقع Capitano Store شغال على http://localhost:${PORT}`);
 });
 
-userBot.launch().then(() => console.log('🤖 بوت الخدمة (بديل الموقع) شغال.'));
+userBot.launch().then(() => console.log('🤖 بوت الخدمة شغال.'));
 adminBot.launch().then(() => console.log('🤖 بوت الأدمن شغال.'));
 
 process.once('SIGINT', () => { userBot.stop('SIGINT'); adminBot.stop('SIGINT'); });
