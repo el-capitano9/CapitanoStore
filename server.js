@@ -51,7 +51,7 @@ const upload = multer({ storage });
 // Initialize Express App
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.اللعبةpress.json());
 app.use(express.static('public'));
 
 // Telegraf Admin Bot & User Bot
@@ -353,7 +353,7 @@ userBot.action(/select_pack_(.*)/, async (ctx) => {
 
   await ctx.answerCbQuery();
   await ctx.reply(
-    `📝 *خطوة (2/3):* أرسل الآن *معرف الحساب (ID)* الخاص بك في اللعبة:\n\n_(يمكنك إرسال أي ملاحظات إضافية مع الـ ID في نفس الرسالة)_`,
+    `📝 *خطوة (2/3):* أرسل الآن *معرف الحساب (U,ID)* الخاص بك:\n\n_(يمكنك إرسال أي ملاحظات إضافية في نفس الرسالة)_`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -379,9 +379,10 @@ userBot.on('text', async (ctx) => {
       `💳 *خطوة الدفع والتأكيد الأخيرة:*
 ━━━━━━━━━━━━━━━━━━
 💰 المبلغ المطلوب تحويله: *${ctx.session.price} ج.م*
-📱 رقم فودافون كاش: \`01036732010\`
+📱 رقم المحفظة : \`01036732010\`
 ━━━━━━━━━━━━━━━━━━
-📸 أرسل صورة إيصال التحويل (Screenshot) الآن لإكمال الطلب.`,
+📸 أرسل صورة إيصال التحويل (Screenshot) الآن لإكمال الطلب.
+⚠️مع اظهار الرقم والمبلغ!`,
       { parse_mode: 'Markdown' }
     );
   } else {
