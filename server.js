@@ -131,10 +131,9 @@ const packsKeyboard = (gameKey) => {
 userBot.start(async (ctx) => {
   ctx.session = {};
   await ctx.reply(
-    `🔥 مرحباً بك في *Capitano Store*!
-أقوى متجر شحن للألعاب.
+    `🔥 مرحباً بك في *Capitano Store*!أقوى متجر شحن.
 
-📌 اختر اللعبة من الأزرار:`,
+📌 اختر من الأزرار:`,
     { parse_mode: 'Markdown', reply_markup: gamesKeyboard() }
   );
 });
