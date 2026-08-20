@@ -14,6 +14,12 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '8243764053';
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://capitanostore-production.up.railway.app';
 
+// ======== التأكد من وجود مجلد uploads ========
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+  console.log('📁 تم إنشاء مجلد uploads');
+}
+
 // ======== بوت الأدمن ========
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN);
 
@@ -101,7 +107,7 @@ userBot.use(session());
 
 // بيانات الألعاب (مختصرة للبوت)
 const GAMES_DATA = {
-  'PUBG': { packs: [{ label: '60 UC', price: 55 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }] },
+  'PUBG': { packs: [{ label: '60 UC', price: 60 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }] },
   'FC Mobile': { packs: [{ label: '40+8 Points', price: 30 }, { label: '100+20 Points', price: 70 }, { label: '520+104 Points', price: 270 }, { label: '1070+214 Points', price: 520 }] },
   'Call of Duty': { packs: [{ label: '30 CP', price: 30 }, { label: '80 CP', price: 55 }, { label: '420 CP', price: 260 }, { label: '880 CP', price: 510 }] },
   'Blood Strike MAX': { packs: [{ label: '50+1 Golds', price: 30 }, { label: '100+5 Golds', price: 55 }, { label: '300+20 Golds', price: 150 }, { label: '500+40 Golds', price: 240 }, { label: '1000+100 Golds', price: 470 }] },
@@ -133,7 +139,7 @@ userBot.start(async (ctx) => {
   ctx.session = {};
   await ctx.reply(
     `🔥 مرحباً بك في *Capitano Store*!
-أقوى متجر شحن للألعاب.
+أقوى متجر شحن.
 
 📌 اختر اللعبة من الأزرار:`,
     { parse_mode: 'Markdown', reply_markup: gamesKeyboard() }
@@ -159,7 +165,7 @@ userBot.action(/pack_(.*)_(.*)_(.*)/, async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.reply(
     `💰 اخترت باقة *${ctx.session.pack}* بسعر *${ctx.session.price}* ج.م.
-📝 اكتب الـ ID أو اليوزرنيم في رسالة منفصلة.
+📝 اكتب الـ ID اليوزرنيم في رسالة منفصلة. في رسالة منفصلة.
 (ممكن تكتب ملاحظاتك معاه)`,
     { parse_mode: 'Markdown' }
   );
@@ -193,34 +199,49 @@ userBot.on('text', async (ctx) => {
 
 // استقبال الصور
 userBot.on('photo', async (ctx) => {
-  if (ctx.session.step !== 'waiting_screenshot') {
+  if (!ctx.session || ctx.session.step !== 'waiting_screenshot') {
     return ctx.reply('⚠️ ابدأ طلب جديد بـ /start');
   }
 
-  const photo = ctx.message.photo[ctx.message.photo.length - 1];
-  const fileLink = await ctx.telegram.getFileLink(photo.file_id);
-  const response = await axios({ url: fileLink.href, responseType: 'stream' });
-  const tempPath = `./uploads/temp_${Date.now()}.jpg`;
-  const writer = fs.createWriteStream(tempPath);
-  response.data.pipe(writer);
-  await new Promise((resolve) => writer.on('finish', resolve));
+  try {
+    const photo = ctx.message.photo[ctx.message.photo.length - 1];
+    const fileLink = await ctx.telegram.getFileLink(photo.file_id);
+    
+    // حفظ الصورة مؤقتاً
+    const tempPath = `./uploads/temp_${Date.now()}.jpg`;
+    const response = await axios({ url: fileLink.href, responseType: 'stream' });
+    const writer = fs.createWriteStream(tempPath);
+    response.data.pipe(writer);
+    
+    await new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
 
-  await sendOrderToAdmin(
-    ctx.session.game,
-    ctx.session.pack,
-    ctx.session.price,
-    ctx.session.account_id,
-    'تم الإرسال عبر البوت',
-    tempPath,
-    '🤖 بوت التليجرام'
-  );
+    // إرسال للأدمن
+    await sendOrderToAdmin(
+      ctx.session.game,
+      ctx.session.pack,
+      ctx.session.price,
+      ctx.session.account_id,
+      'تم الإرسال عبر البوت',
+      tempPath,
+      '🤖 بوت التليجرام'
+    );
 
-  try { fs.unlinkSync(tempPath); } catch(e) {}
+    // حذف الملف المؤقت
+    try { fs.unlinkSync(tempPath); } catch(e) {}
 
-  await ctx.reply('✅ تم استلام طلبك بنجاح! سيتم الارسال بعد التأكيد', {
-    reply_markup: { inline_keyboard: [[{ text: '🔗 افتح الموقع', url: BASE_URL }]] }
-});
-  ctx.session = {};
+    await ctx.reply('✅ تم استلام طلبك بنجاح! سيتم الارسال بعد التأكيد', {
+      reply_markup: { inline_keyboard: [[{ text: '🔗 افتح الموقع', url: BASE_URL }]] }
+    });
+    ctx.session = {};
+
+  } catch (error) {
+    console.error('❌ خطأ في معالجة الصورة:', error);
+    await ctx.reply('❌ حدث خطأ أثناء معالجة الصورة، حاول تاني.');
+    ctx.session = {};
+  }
 });
 
 // ======== تشغيل السيرفر والبوتات ========
