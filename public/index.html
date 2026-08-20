@@ -3,477 +3,612 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Capitano Store</title>
+  <title>CAPITANO STORE | كابيتانو ستور - شحن ألعاب وتطبيقات</title>
+
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#0b0f19',
+              card: '#151c2c',
+              border: '#232d42',
+              accent: '#3b82f6',
+              gold: '#f59e0b',
+              green: '#10b981'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
     body {
-      min-height: 100vh;
-      background: #0a0e1a;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-      transition: background 0.6s ease;
-    }
-    .container {
-      max-width: 800px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 48px;
-      padding: 30px 25px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-      height: fit-content;
-      margin-top: 20px;
-    }
-    .header { text-align: center; margin-bottom: 30px; }
-    .header h1 {
-      font-size: 2.6rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #fbbf24, #ef4444);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 2px;
-    }
-    .header .sub {
-      color: #94a3b8;
-      border-bottom: 1px dashed #2d3748;
-      padding-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .header .sub a {
-      color: #60a5fa;
-      text-decoration: none;
-      background: rgba(59,130,246,0.1);
-      padding: 8px 16px;
-      border-radius: 30px;
-      font-size: 0.9rem;
-      transition: 0.3s;
-      border: 1px solid #334155;
-    }
-    .header .sub a:hover { background: #2563eb; color: white; border-color: #2563eb; }
-
-    /* Tabs Games */
-    .tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    .tab-btn {
-      background: rgba(30, 41, 59, 0.5);
-      border: 2px solid #334155;
-      border-radius: 16px;
-      padding: 14px 5px;
-      text-align: center;
-      color: #94a3b8;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    .tab-btn img { width: 32px; height: 32px; object-fit: contain; border-radius: 8px; }
-    .tab-btn:hover { transform: translateY(-3px); border-color: #60a5fa; background: rgba(59,130,246,0.05); }
-    .tab-btn.active {
-      border-color: var(--accent, #fbbf24);
-      background: rgba(255, 255, 255, 0.05);
-      color: white;
-      box-shadow: 0 0 30px rgba(var(--accent-rgb, 251, 191, 36), 0.15);
-      transform: scale(1.02);
+      font-family: 'Cairo', sans-serif;
+      background-color: #080b11;
+      background-image: 
+        radial-gradient(at 20% 20%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 80% 80%, rgba(245, 158, 11, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: #f3f4f6;
     }
 
-    /* Game Panel */
-    .game-panel {
-      display: none;
-      animation: fadeSlide 0.5s ease;
-    }
-    .game-panel.active { display: block; }
-
-    @keyframes fadeSlide {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .glass-card {
+      background: rgba(21, 28, 44, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .panel-title {
-      color: white;
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .panel-title img { width: 40px; height: 40px; object-fit: contain; border-radius: 10px; }
-
-    .packs-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 25px;
-    }
     .pack-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 16px 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s;
-      color: #e2e8f0;
-      font-weight: 600;
-      backdrop-filter: blur(5px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .pack-card:hover { border-color: var(--accent, #fbbf24); transform: scale(1.03); }
-    .pack-card.active {
-      border-color: var(--accent, #fbbf24);
-      background: rgba(var(--accent-rgb, 251, 191, 36), 0.15);
-      color: white;
-      box-shadow: 0 0 20px rgba(var(--accent-rgb, 251, 191, 36), 0.1);
+    .pack-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-color, #3b82f6);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px var(--accent-glow, rgba(59, 130, 246, 0.3));
     }
-    .pack-card .price-tag {
-      display: block;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 5px;
+    .pack-card.selected {
+      border-color: var(--accent-color, #3b82f6);
+      background: rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 20px var(--accent-glow, rgba(59, 130, 246, 0.4));
     }
 
-    .form-group {
-      margin: 18px 0;
+    .game-tab {
+      transition: all 0.3s ease;
     }
-    .form-group label {
-      display: block;
-      color: #e2e8f0;
-      font-weight: 600;
-      margin-bottom: 6px;
+    .game-tab.active {
+      border-color: var(--accent-color, #3b82f6);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 15px var(--accent-glow, rgba(59, 130, 246, 0.25));
     }
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 15px 18px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid #334155;
-      border-radius: 16px;
-      color: white;
-      font-size: 1rem;
-      outline: none;
-      transition: 0.3s;
-    }
-    .form-group input:focus, .form-group textarea:focus {
-      border-color: var(--accent, #3b82f6);
-      box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 59,130,246), 0.2);
-    }
-    .form-group textarea { min-height: 60px; resize: vertical; }
 
-    .warning-box {
-      background: rgba(239, 68, 68, 0.08);
-      border-right: 4px solid #ef4444;
-      padding: 12px 16px;
-      border-radius: 12px;
-      color: #fca5a5;
-      font-size: 0.9rem;
-      margin: 15px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .bank-note {
-      background: rgba(251, 191, 36, 0.05);
-      border: 1px solid #fbbf24;
-      border-radius: 16px;
-      padding: 18px;
-      text-align: center;
-      margin: 15px 0;
-    }
-    .bank-note p { color: #fcd34d; font-size: 1.2rem; font-weight: 700; }
-    .bank-note small { color: #d97706; }
-
-    .upload-area {
-      border: 2px dashed #475569;
-      border-radius: 20px;
-      padding: 25px;
-      text-align: center;
-      color: #94a3b8;
-      cursor: pointer;
-      transition: 0.3s;
-      margin: 15px 0;
-    }
-    .upload-area:hover { border-color: var(--accent, #3b82f6); background: rgba(var(--accent-rgb, 59,130,246), 0.02); }
-    #file-name { color: var(--accent, #60a5fa); font-weight: 600; }
-    #screenshot-preview { max-width: 100%; max-height: 200px; margin-top: 12px; border-radius: 12px; display: none; }
-
-    .submit-btn {
-      width: 100%;
-      padding: 18px;
-      background: var(--accent, #2563eb);
-      border: none;
-      border-radius: 20px;
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      margin-top: 10px;
-      box-shadow: 0 10px 30px rgba(var(--accent-rgb, 37, 99, 235), 0.3);
-    }
-    .submit-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
-    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    #response-msg { margin-top: 20px; text-align: center; font-weight: 600; padding: 12px; border-radius: 14px; display: none; }
-
-    .bot-link-btn {
-      display: inline-block;
-      margin-top: 20px;
-      background: #1e293b;
-      padding: 12px 25px;
-      border-radius: 40px;
-      color: #94a3b8;
-      text-decoration: none;
-      border: 1px solid #334155;
-      transition: 0.3s;
-      width: 100%;
-      text-align: center;
-      font-weight: 600;
-    }
-    .bot-link-btn:hover { background: #2d3748; color: white; border-color: #60a5fa; }
-
-    @media (max-width: 500px) {
-      .tabs { grid-template-columns: repeat(2, 1fr); }
-      .packs-grid { grid-template-columns: 1fr 1fr; }
-      .container { padding: 20px 15px; }
-    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #080b11; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body>
-<div class="container" id="appContainer">
-  <div class="header">
-    <h1>CAPITANO Store</h1>
-    <div class="sub">
-      <span>متجر الشحن الأسرع</span>
-      <a href="https://t.me/Capitano_Store_bot" target="_blank">🤖 تواصل عبر البوت</a>
+<body class="min-h-screen pb-12 antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-50 glass-card border-b border-gray-800/80 mb-8">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-blue-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-amber-500/20">
+          C
+        </div>
+        <div>
+          <h1 class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-blue-400">
+            CAPITANO STORE
+          </h1>
+          <p class="text-xs text-gray-400 font-semibold">متجر الشحن الموثوق والأسرع ⚡</p>
+        </div>
+      </div>
+
+      <a href="https://t.me/Capitano_Store_bot" target="_blank" 
+         class="flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-md">
+        <i class="fa-brands font-bold fa-telegram text-lg"></i>
+        <span class="hidden sm:inline">البوت المباشر</span>
+      </a>
     </div>
-  </div>
+  </header>
 
-  <!-- Tabs -->
-  <div class="tabs" id="gameTabs"></div>
-
-  <form id="orderForm" enctype="multipart/form-data">
-    <div id="panelsContainer"></div>
-
-    <div class="warning-box"><span>⚠️</span><div><strong>تحذير:</strong> ارفع الصورة قبل التأكيد، وتأكد من ظهور المبلغ والرقم.</div></div>
-    <div class="bank-note"><p>💳 حول المبلغ على رقم: <span style="color:#fde047;">01036732010</span></p><small>فودافون كاش</small></div>
-
-    <div class="upload-area" id="uploadArea"><div>📤 اضغط لرفع الصورة</div><span id="file-name">لم يتم اختيار ملف</span><img id="screenshot-preview" src="#" alt="Preview"></div>
-    <input type="file" id="screenshot" name="screenshot" accept="image/*" style="display:none;" required>
-
-    <button type="submit" class="submit-btn" id="submitBtn">🚀 تأكيد الطلب</button>
-    <div id="response-msg"></div>
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto px-4">
     
-    <a href="https://t.me/Capitano_Store_bot" target="_blank" class="bot-link-btn">🤖 أو اطلب عبر البوت (بديل الموقع)</a>
-  </form>
-</div>
+    <!-- Trust Banner -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div class="glass-card p-3 rounded-2xl flex items-center gap-3 border border-gray-800">
+        <i class="fa-solid fa-bolt text-amber-400 text-xl"></i>
+        <div>
+          <h4 class="text-xs text-gray-400 font-bold">تسليم فوري</h4>
+          <p class="text-xs font-bold text-gray-200">خلال 5-15 دقيقة</p>
+        </div>
+      </div>
+      <div class="glass-card p-3 rounded-2xl flex items-center gap-3 border border-gray-800">
+        <i class="fa-solid fa-shield-halved text-emerald-400 text-xl"></i>
+        <div>
+          <h4 class="text-xs text-gray-400 font-bold">شحن آمن 100%</h4>
+          <p class="text-xs font-bold text-gray-200">طرق رسمية ومضمونة</p>
+        </div>
+      </div>
+      <div class="glass-card p-3 rounded-2xl flex items-center gap-3 border border-gray-800">
+        <i class="fa-solid fa-headset text-blue-400 text-xl"></i>
+        <div>
+          <h4 class="text-xs text-gray-400 font-bold">دعم متواصل</h4>
+          <p class="text-xs font-bold text-gray-200">خدمة عملاء 24/7</p>
+        </div>
+      </div>
+      <div class="glass-card p-3 rounded-2xl flex items-center gap-3 border border-gray-800">
+        <i class="fa-solid fa-wallet text-purple-400 text-xl"></i>
+        <div>
+          <h4 class="text-xs text-gray-400 font-bold">وسيلة الدفع</h4>
+          <p class="text-xs font-bold text-gray-200">فودافون كاش / اتصالات</p>
+        </div>
+      </div>
+    </div>
 
-<script>
-  // ======== بيانات الألعاب مع الصور الحقيقية والألوان ========
-  const GAMES = {
-    'PUBG': { 
-      icon: 'https://img.icons8.com/color/48/pubg.png', 
-      color: '#f59e0b', rgb: '245, 158, 11',
-      packs: [{ label: '60 UC', price: 60 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }],
-      placeholder: 'أدخل ID حسابك في PUBG'
-    },
-    'FC Mobile': { 
-      icon: 'https://img.icons8.com/color/48/fc-mobile.png', 
-      color: '#3b82f6', rgb: '59, 130, 246',
-      packs: [{ label: '40+8 Points', price: 30 }, { label: '100+20 Points', price: 70 }, { label: '520+104 Points', price: 270 }, { label: '1070+214 Points', price: 520 }],
-      placeholder: 'أدخل ID حسابك في FC'
-    },
-    'Call of Duty': { 
-      icon: 'https://img.icons8.com/color/48/call-of-duty.png', 
-      color: '#10b981', rgb: '16, 185, 129',
-      packs: [{ label: '30 CP', price: 30 }, { label: '80 CP', price: 55 }, { label: '420 CP', price: 260 }, { label: '880 CP', price: 510 }],
-      placeholder: 'أدخل ID حسابك في COD'
-    },
-    'Blood Strike MAX': { 
-      icon: 'https://img.icons8.com/color/48/blood-strike.png', 
-      color: '#ef4444', rgb: '239, 68, 68',
-      packs: [{ label: '50+1 Golds', price: 30 }, { label: '100+5 Golds', price: 55 }, { label: '300+20 Golds', price: 150 }, { label: '500+40 Golds', price: 240 }, { label: '1000+100 Golds', price: 470 }],
-      placeholder: 'أدخل ID حسابك في Blood Strike'
-    },
-    'Free Fire': { 
-      icon: 'https://img.icons8.com/color/48/free-fire.png', 
-      color: '#f97316', rgb: '249, 115, 22',
-      packs: [{ label: '100 D', price: 65 }, { label: '210 D', price: 120 }, { label: '530 D', price: 280 }, { label: '1080 D', price: 555 }],
-      placeholder: 'أدخل ID حسابك في Free Fire'
-    },
-    'Telegram Stars': { 
-      icon: 'https://img.icons8.com/color/48/telegram-app.png', 
-      color: '#8b5cf6', rgb: '139, 92, 246',
-      packs: [{ label: '75 Stars', price: 80 }, { label: '100 Stars', price: 115 }, { label: '150 Stars', price: 155 }, { label: '250 Stars', price: 250 }, { label: '350 Stars', price: 335 }, { label: '500 Stars', price: 470 }, { label: '750 Stars', price: 700 }, { label: 'Premium 3 Months', price: 745 }],
-      placeholder: '@username اليوزرنيم'
+    <!-- Store Section -->
+    <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-800">
+      
+      <!-- Section Title -->
+      <div class="mb-6">
+        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-gamepad text-amber-400"></i>
+          اختر اللعبة أو التطبيق:
+        </h2>
+        <p class="text-sm text-gray-400 mt-1">اضغط على اللعبة لعرض الباقات المتاحة وتفاصيل الشحن</p>
+      </div>
+
+      <!-- Games Tabs Selector -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-8" id="gamesGrid">
+        <!-- Dynmically Populated -->
+      </div>
+
+      <form id="orderForm" novalidate>
+        
+        <!-- Game Content Panel -->
+        <div id="gamePanel" class="space-y-8">
+          <!-- Banner & Title -->
+          <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-900/60 border border-gray-800" id="gameHeader">
+            <img id="activeGameIcon" src="" alt="Icon" class="w-14 h-14 rounded-2xl object-cover shadow-md">
+            <div>
+              <h3 id="activeGameTitle" class="text-xl font-bold text-white"></h3>
+              <p id="activeGameSubtitle" class="text-xs text-gray-400 mt-0.5">اختر الفئة أو الكمية المطلوبة للحساب</p>
+            </div>
+          </div>
+
+          <!-- Step 1: Packs Selection -->
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-black">1</span>
+              اختر الباقة المناسبة:
+            </label>
+
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3" id="packsGrid">
+              <!-- Dynamically Populated -->
+            </div>
+            <p id="packError" class="hidden text-xs text-red-400 font-bold mt-2 flex items-center gap-1">
+              <i class="fa-solid fa-circle-exclamation"></i> برجاء اختيار باقة أولاً قبل المتابعة!
+            </p>
+          </div>
+
+          <!-- Step 2: Account Details -->
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-black">2</span>
+              بيانات الحساب:
+            </label>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 mb-2" id="accountIdLabel">معرف الحساب (ID):</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500">
+                    <i class="fa-solid fa-user-tag"></i>
+                  </span>
+                  <input type="text" id="accountId" required
+                         class="w-full bg-gray-900/80 border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl py-3.5 pr-11 pl-4 text-white text-sm outline-none transition"
+                         placeholder="أدخل الـ ID الخاص بك هنا...">
+                </div>
+                <p id="idError" class="hidden text-xs text-red-400 font-bold mt-1">⚠️ برجاء كتابة المعرف/الـ ID الخاص بك!</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-400 mb-2">ملاحظات إضافية (اختياري):</label>
+                <textarea id="orderNotes" rows="2"
+                          class="w-full bg-gray-900/80 border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl p-3 text-white text-sm outline-none transition"
+                          placeholder="مثال: الاسم في اللعبة، أو تفاصيل تسجيل الدخول إذا تطلب الأمر..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment Section -->
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-black">3</span>
+              الدفع وتحويل المبلغ:
+            </label>
+
+            <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-2xl p-5 relative overflow-hidden">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="space-y-1 text-center sm:text-right">
+                  <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">رقم المحفظة (فودافون كاش)</span>
+                  <div class="text-2xl font-black text-white tracking-widest font-mono" id="walletNumber">01036732010</div>
+                  <p class="text-xs text-gray-400">يرجى تحويل المبلغ المطلوب بالضبط للرقم أعلاه</p>
+                </div>
+
+                <button type="button" onclick="copyWallet()" 
+                        class="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-5 py-3 rounded-xl transition flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95">
+                  <i class="fa-regular fa-copy text-sm"></i>
+                  <span>نسخ الرقم</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Screenshot Upload -->
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-black">4</span>
+              إرفاق إيصال التحويل:
+            </label>
+
+            <div id="dropZone" onclick="document.getElementById('screenshot').click()"
+                 class="border-2 border-dashed border-gray-700 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-gray-900/40 hover:bg-gray-900/80 group">
+              <input type="file" id="screenshot" accept="image/*" class="hidden">
+              
+              <div id="uploadPrompt" class="space-y-2">
+                <div class="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-blue-600/20 group-hover:text-blue-400 flex items-center justify-center mx-auto text-gray-400 transition">
+                  <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                </div>
+                <p class="text-sm font-bold text-gray-300">اضغط هنا لرفع صورة إيصال التحويل</p>
+                <p class="text-xs text-gray-500">يدعم صيغ PNG, JPG, JPEG (تأكد من وضوح الرقم والمبلغ)</p>
+              </div>
+
+              <!-- Preview Area -->
+              <div id="previewArea" class="hidden space-y-3">
+                <div class="relative inline-block">
+                  <img id="imagePreview" class="max-h-48 rounded-xl border border-gray-700 shadow-md mx-auto">
+                  <button type="button" onclick="removeImage(event)" 
+                          class="absolute -top-2 -right-2 bg-red-600 hover:bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-lg transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                </div>
+                <p id="fileName" class="text-xs font-bold text-emerald-400"></p>
+              </div>
+            </div>
+            <p id="fileError" class="hidden text-xs text-red-400 font-bold mt-2">⚠️ إيصال التحويل مطلوب لإتمام الطلب!</p>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4">
+            <button type="submit" id="submitBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-amber-500 hover:from-blue-500 hover:to-amber-400 text-white font-black text-lg py-4 rounded-2xl shadow-xl transition transform active:scale-98 flex items-center justify-center gap-3">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>تأكيد وإرسال الطلب</span>
+            </button>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- Status Toast Notification -->
+      <div id="statusToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 max-w-md w-full px-4 z-50">
+        <div id="toastContent" class="p-4 rounded-2xl shadow-2xl flex items-center gap-3 border text-sm font-bold"></div>
+      </div>
+
+    </div>
+
+    <!-- Alternative Bot Floating Footer -->
+    <div class="mt-8 text-center space-y-3">
+      <p class="text-xs text-gray-500">تفضل استخدام التليجرام مباشرة؟</p>
+      <a href="https://t.me/Capitano_Store_bot" target="_blank" 
+         class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-2xl text-xs font-bold border border-gray-700 transition">
+        <i class="fa-brands fa-telegram text-blue-400 text-base"></i>
+        <span>اطلب عبر بوت التليجرام الآلي</span>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Script Code -->
+  <script>
+    const GAMES_DATA = {
+      'PUBG': {
+        name: 'PUBG Mobile',
+        icon: 'https://cdn-icons-png.flaticon.com/512/3408/3408506.png',
+        color: '#f59e0b',
+        glow: 'rgba(245, 158, 11, 0.4)',
+        placeholder: 'أدخل الـ ID الخاص بحساب ببجي (مثال: 5123456789)',
+        packs: [
+          { label: '60 UC', price: 60, badge: '' },
+          { label: '300 + 25 UC', price: 245, badge: 'الأكثر مبيعاً' },
+          { label: '600 + 60 UC', price: 485, badge: 'شبيهاً للرويال باس' },
+          { label: '1500 + 300 UC', price: 1210, badge: 'أفضل قيمة' }
+        ]
+      },
+      'FC Mobile': {
+        name: 'EA SPORTS FC Mobile',
+        icon: 'https://cdn-icons-png.flaticon.com/512/53/53283.png',
+        color: '#10b981',
+        glow: 'rgba(16, 185, 129, 0.4)',
+        placeholder: 'أدخل الـ UID أو معرف FC Mobile',
+        packs: [
+          { label: '48 FC Points', price: 30, badge: '' },
+          { label: '120 FC Points', price: 70, badge: '' },
+          { label: '624 FC Points', price: 270, badge: 'شائع' },
+          { label: '1284 FC Points', price: 520, badge: 'توفير' }
+        ]
+      },
+      'Call of Duty': {
+        name: 'COD Mobile',
+        icon: 'https://cdn-icons-png.flaticon.com/512/808/808439.png',
+        color: '#ef4444',
+        glow: 'rgba(239, 68, 68, 0.4)',
+        placeholder: 'أدخل الـ Player ID (المعرف داخل اللعبة)',
+        packs: [
+          { label: '30 CP', price: 30, badge: '' },
+          { label: '80 CP', price: 55, badge: '' },
+          { label: '420 CP', price: 260, badge: 'العربات' },
+          { label: '880 CP', price: 510, badge: 'البتل باس' }
+        ]
+      },
+      'Blood Strike MAX': {
+        name: 'Blood Strike',
+        icon: 'https://cdn-icons-png.flaticon.com/512/1041/1041883.png',
+        color: '#8b5cf6',
+        glow: 'rgba(139, 92, 246, 0.4)',
+        placeholder: 'أدخل User ID الخاص ببلود سترايك',
+        packs: [
+          { label: '50+1 Golds', price: 30, badge: '' },
+          { label: '100+5 Golds', price: 55, badge: '' },
+          { label: '300+20 Golds', price: 150, badge: 'شائع' },
+          { label: '500+40 Golds', price: 240, badge: '' },
+          { label: '1000+100 Golds', price: 470, badge: 'توفير ممتاز' }
+        ]
+      },
+      'Free Fire': {
+        name: 'Free Fire',
+        icon: 'https://cdn-icons-png.flaticon.com/512/287/287221.png',
+        color: '#f97316',
+        glow: 'rgba(249, 115, 22, 0.4)',
+        placeholder: 'أدخل الـ ID الخاص بك في فري فاير',
+        packs: [
+          { label: '100 Diamonds', price: 65, badge: '' },
+          { label: '210 Diamonds', price: 120, badge: '' },
+          { label: '530 Diamonds', price: 280, badge: 'الأعلى طلباً' },
+          { label: '1080 Diamonds', price: 555, badge: 'توفير ضخم' }
+        ]
+      },
+      'Telegram Stars': {
+        name: 'Telegram Stars & Premium',
+        icon: 'https://cdn-icons-png.flaticon.com/512/2111/2111646.png',
+        color: '#3b82f6',
+        glow: 'rgba(59, 130, 246, 0.4)',
+        placeholder: 'أدخل يوزر حسابك على تليجرام (مثال: @username)',
+        packs: [
+          { label: '75 Stars', price: 80, badge: '' },
+          { label: '100 Stars', price: 115, badge: '' },
+          { label: '250 Stars', price: 250, badge: '' },
+          { label: '500 Stars', price: 470, badge: 'شائع' },
+          { label: '750 Stars', price: 700, badge: '' },
+          { label: 'اشتراك بلس 3 شهور', price: 745, badge: 'مميز 🔥' }
+        ]
+      }
+    };
+
+    let selectedGameKey = 'PUBG';
+    let selectedPackData = null;
+
+    // Elements
+    const gamesGrid = document.getElementById('gamesGrid');
+    const packsGrid = document.getElementById('packsGrid');
+    const accountIdInput = document.getElementById('accountId');
+    const accountIdLabel = document.getElementById('accountIdLabel');
+    const screenshotInput = document.getElementById('screenshot');
+
+    // Init App
+    function init() {
+      renderGamesTabs();
+      switchGame('PUBG');
+      setupFileInput();
     }
-  };
 
-  const gameTabs = document.getElementById('gameTabs');
-  const panelsContainer = document.getElementById('panelsContainer');
-  let currentGame = 'PUBG';
-  let selectedPack = null;
+    function renderGamesTabs() {
+      gamesGrid.innerHTML = '';
+      Object.keys(GAMES_DATA).forEach(key => {
+        const game = GAMES_DATA[key];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `game-tab p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-2 border border-gray-800 text-center hover:scale-105 active:scale-95 ${key === selectedGameKey ? 'active' : ''}`;
+        btn.dataset.game = key;
+        btn.innerHTML = `
+          <img src="${game.icon}" class="w-8 h-8 rounded-lg object-contain">
+          <span class="text-xs font-bold text-gray-200">${game.name}</span>
+        `;
+        btn.onclick = () => switchGame(key);
+        gamesGrid.appendChild(btn);
+      });
+    }
 
-  // بناء التابز والبانيلز
-  Object.keys(GAMES).forEach((key, index) => {
-    const game = GAMES[key];
-    // Tab
-    const btn = document.createElement('div');
-    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
-    btn.dataset.game = key;
-    btn.innerHTML = `<img src="${game.icon}" alt="${key}" onerror="this.style.display='none'"> ${key}`;
-    btn.addEventListener('click', () => selectGame(key));
-    gameTabs.appendChild(btn);
+    function switchGame(key) {
+      selectedGameKey = key;
+      selectedPackData = null;
 
-    // Panel
-    const panel = document.createElement('div');
-    panel.className = `game-panel ${index === 0 ? 'active' : ''}`;
-    panel.id = `panel-${key}`;
-    
-    let packsHTML = '';
-    game.packs.forEach((p, i) => {
-      packsHTML += `<div class="pack-card" data-pack="${p.label}" data-price="${p.price}" onclick="selectPack(this, '${key}')">
-        ${p.label} <span class="price-tag">${p.price} ج.م</span>
-      </div>`;
+      const game = GAMES_DATA[key];
+
+      // Update Theme CSS Variables
+      document.documentElement.style.setProperty('--accent-color', game.color);
+      document.documentElement.style.setProperty('--accent-glow', game.glow);
+
+      // Tabs visual status
+      document.querySelectorAll('.game-tab').forEach(tab => {
+        if (tab.dataset.game === key) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // Game Header
+      document.getElementById('activeGameIcon').src = game.icon;
+      document.getElementById('activeGameTitle').textContent = game.name;
+      document.getElementById('accountId').placeholder = game.placeholder;
+
+      // Render Packs
+      renderPacks(game.packs);
+
+      // Clear validation errors
+      document.getElementById('packError').classList.add('hidden');
+      document.getElementById('idError').classList.add('hidden');
+    }
+
+    function renderPacks(packs) {
+      packsGrid.innerHTML = '';
+      packs.forEach((pack, index) => {
+        const card = document.createElement('div');
+        card.className = `pack-card glass-card p-4 rounded-2xl border border-gray-800 cursor-pointer relative flex flex-col justify-between text-center`;
+        card.onclick = () => selectPack(card, pack);
+
+        let badgeHTML = pack.badge ? `<span class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-black text-[10px] px-2.5 py-0.5 rounded-full shadow">${pack.badge}</span>` : '';
+
+        card.innerHTML = `
+          ${badgeHTML}
+          <div class="mt-1">
+            <h4 class="font-extrabold text-white text-base">${pack.label}</h4>
+          </div>
+          <div class="mt-3 pt-2 border-t border-gray-800/80">
+            <span class="text-lg font-black text-amber-400">${pack.price}</span>
+            <span class="text-xs text-gray-400 font-bold"> ج.م</span>
+          </div>
+        `;
+        packsGrid.appendChild(card);
+      });
+    }
+
+    function selectPack(cardEl, pack) {
+      document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
+      cardEl.classList.add('selected');
+      selectedPackData = pack;
+      document.getElementById('packError').classList.add('hidden');
+    }
+
+    function setupFileInput() {
+      screenshotInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          document.getElementById('uploadPrompt').classList.add('hidden');
+          document.getElementById('previewArea').classList.remove('hidden');
+          document.getElementById('fileName').textContent = file.name;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            document.getElementById('imagePreview').src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+          document.getElementById('fileError').classList.add('hidden');
+        }
+      });
+    }
+
+    function removeImage(e) {
+      e.stopPropagation();
+      screenshotInput.value = '';
+      document.getElementById('uploadPrompt').classList.remove('hidden');
+      document.getElementById('previewArea').classList.add('hidden');
+      document.getElementById('imagePreview').src = '';
+    }
+
+    function copyWallet() {
+      const walletNum = "01036732010";
+      navigator.clipboard.writeText(walletNum).then(() => {
+        showToast('✅ تم نسخ رقم فودافون كاش بنجاح!', 'success');
+      });
+    }
+
+    // Form Validation & Submission
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      let isValid = true;
+
+      // Validate Pack
+      if (!selectedPackData) {
+        document.getElementById('packError').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('packError').classList.add('hidden');
+      }
+
+      // Validate ID
+      const accountId = accountIdInput.value.trim();
+      if (!accountId) {
+        document.getElementById('idError').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('idError').classList.add('hidden');
+      }
+
+      // Validate File
+      if (!screenshotInput.files || screenshotInput.files.length === 0) {
+        document.getElementById('fileError').classList.remove('hidden');
+        isValid = false;
+      } else {
+        document.getElementById('fileError').classList.add('hidden');
+      }
+
+      if (!isValid) return;
+
+      // Submit Form
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري معالجة الطلب...</span>`;
+
+      const formData = new FormData();
+      formData.append('game', GAMES_DATA[selectedGameKey].name);
+      formData.append('pack', selectedPackData.label);
+      formData.append('price', selectedPackData.price);
+      formData.append('account_id', accountId);
+      formData.append('notes', document.getElementById('orderNotes').value.trim());
+      formData.append('screenshot', screenshotInput.files[0]);
+
+      try {
+        const response = await fetch('/api/submit', { method: 'POST', body: formData });
+        const data = await response.json();
+
+        if (data.success) {
+          showToast('🚀 ' + data.message, 'success');
+          // Reset form
+          document.getElementById('orderForm').reset();
+          selectedPackData = null;
+          document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
+          removeImage(e);
+        } else {
+          showToast('❌ ' + data.message, 'error');
+        }
+      } catch (err) {
+        showToast('❌ حدث خطأ في الاتصال بالسيرفر، حاول مجدداً', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>تأكيد وإرسال الطلب</span>`;
+      }
     });
 
-    panel.innerHTML = `
-      <div class="panel-title"><img src="${game.icon}" alt="${key}" onerror="this.style.display='none'"> ${key}</div>
-      <div class="packs-grid">${packsHTML}</div>
-      <div class="form-group">
-        <label>🆔</label>
-        <input type="text" class="account-input" data-game="${key}" placeholder="${game.placeholder}" required>
-      </div>
-      <div class="form-group">
-        <label>📝 ملاحظات إضافية (اختياري)</label>
-        <textarea class="notes-input" data-game="${key}" placeholder="أي تفاصيل تريد إضافتها..."></textarea>
-      </div>
-      <input type="hidden" class="game-name" value="${key}">
-    `;
-    panelsContainer.appendChild(panel);
-  });
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('statusToast');
+      const content = document.getElementById('toastContent');
 
-  // دوال التحكم
-  function selectGame(key) {
-    currentGame = key;
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.tab-btn[data-game="${key}"]`).classList.add('active');
-    document.querySelectorAll('.game-panel').forEach(el => el.classList.remove('active'));
-    document.getElementById(`panel-${key}`).classList.add('active');
-    
-    // تغيير لون الموقع
-    const color = GAMES[key].color;
-    const rgb = GAMES[key].rgb;
-    document.documentElement.style.setProperty('--accent', color);
-    document.documentElement.style.setProperty('--accent-rgb', rgb);
-    document.getElementById('appContainer').style.borderColor = `rgba(${rgb}, 0.3)`;
-    
-    // إعادة تعيين الاختيارات
-    selectedPack = null;
-    document.querySelectorAll('.pack-card').forEach(el => el.classList.remove('active'));
-    document.querySelector(`#panel-${key} .account-input`).value = '';
-    document.querySelector(`#panel-${key} .notes-input`).value = '';
-  }
-
-  function selectPack(el, gameKey) {
-    document.querySelectorAll(`#panel-${gameKey} .pack-card`).forEach(e => e.classList.remove('active'));
-    el.classList.add('active');
-    selectedPack = { label: el.dataset.pack, price: el.dataset.price };
-  }
-
-  // رفع الصورة
-  const uploadArea = document.getElementById('uploadArea');
-  const fileInput = document.getElementById('screenshot');
-  const fileName = document.getElementById('file-name');
-  const preview = document.getElementById('screenshot-preview');
-
-  uploadArea.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', function() {
-    const file = this.files[0];
-    if (file) {
-      fileName.textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = (e) => { preview.src = e.target.result; preview.style.display = 'block'; };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // إرسال النموذج
-  const form = document.getElementById('orderForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const responseMsg = document.getElementById('response-msg');
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const activePanel = document.querySelector('.game-panel.active');
-    const game = activePanel.querySelector('.game-name').value;
-    const accountId = activePanel.querySelector('.account-input').value.trim();
-    const notes = activePanel.querySelector('.notes-input').value.trim();
-
-    if (!selectedPack) { alert('اختر باقة!'); return; }
-    if (!accountId) { alert('اكتب الـ ID!'); return; }
-    if (!fileInput.files || fileInput.files.length === 0) {
-      responseMsg.style.display = 'block';
-      responseMsg.style.background = 'rgba(239,68,68,0.2)';
-      responseMsg.style.color = '#fca5a5';
-      responseMsg.textContent = '⚠️ لازم ترفع السكرين شوت!';
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'جاري الإرسال...';
-
-    const formData = new FormData();
-    formData.append('game', game);
-    formData.append('pack', selectedPack.label);
-    formData.append('price', selectedPack.price);
-    formData.append('account_id', accountId);
-    formData.append('notes', notes);
-    formData.append('screenshot', fileInput.files[0]);
-
-    try {
-      const res = await fetch('/api/submit', { method: 'POST', body: formData });
-      const data = await res.json();
-      responseMsg.style.display = 'block';
-      if (data.success) {
-        responseMsg.style.background = 'rgba(34,197,94,0.15)';
-        responseMsg.style.color = '#86efac';
-        responseMsg.textContent = '✅ ' + data.message;
-        form.reset();
-        selectedPack = null;
-        document.querySelectorAll('.pack-card').forEach(el => el.classList.remove('active'));
-        preview.style.display = 'none';
-        fileName.textContent = 'لم يتم اختيار ملف';
-        document.querySelector('.active .account-input').value = '';
-        document.querySelector('.active .notes-input').value = '';
+      if (type === 'success') {
+        content.className = "p-4 rounded-2xl shadow-2xl flex items-center gap-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 backdrop-blur-md";
       } else {
-        responseMsg.style.background = 'rgba(239,68,68,0.2)';
-        responseMsg.style.color = '#fca5a5';
-        responseMsg.textContent = '❌ ' + data.message;
+        content.className = "p-4 rounded-2xl shadow-2xl flex items-center gap-3 bg-red-950/90 border border-red-500/50 text-red-200 backdrop-blur-md";
       }
-    } catch (err) {
-      responseMsg.style.display = 'block';
-      responseMsg.style.background = 'rgba(239,68,68,0.2)';
-      responseMsg.style.color = '#fca5a5';
-      responseMsg.textContent = '❌ حدث خطأ في الشبكة.';
-    }
-    submitBtn.disabled = false;
-    submitBtn.textContent = '🚀 تأكيد الطلب';
-  });
 
-  // تفعيل أول لعبة
-  selectGame('PUBG');
-</script>
+      content.innerHTML = msg;
+      toast.classList.remove('hidden');
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 5000);
+    }
+
+    init();
+  </script>
 </body>
-  </html>
+</html>
