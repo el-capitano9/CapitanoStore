@@ -1,7 +1,7 @@
 {
   "name": "capitano-store",
   "version": "1.0.0",
-  "description": "Capitano Store",
+  "description": "Capitano Store - Gaming Recharge",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
