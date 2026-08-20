@@ -217,9 +217,9 @@ userBot.on('photo', async (ctx) => {
 
   try { fs.unlinkSync(tempPath); } catch(e) {}
 
-  await ctx.reply('✅ تم استلام طلبك بنجاح! سيتم الارسال بعد التأكيد  
-    reply_markup: { inline_keyboard: [[{ text: '🔗 افتح الموقع', url: BASE_URL }]] } 
-  });
+  await ctx.reply('✅ تم استلام طلبك بنجاح! سيتم الارسال بعد التأكيد', {
+    reply_markup: { inline_keyboard: [[{ text: '🔗 افتح الموقع', url: BASE_URL }]] }
+});
   ctx.session = {};
 });
 
