@@ -83,7 +83,23 @@
     ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body class="min-h-screen pb-12 antialiased selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen pb-12 antialiased selection:bg-blue-600 selection:text-white relative">
+
+  <!-- Maintenance Full Screen Overlay -->
+  <div id="maintenanceOverlay" class="hidden fixed inset-0 z-[100] bg-gray-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-24 h-24 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20 animate-pulse">
+      <i class="fa-solid fa-triangle-exclamation text-amber-400 text-5xl"></i>
+    </div>
+    <h1 class="text-2xl md:text-3xl font-black text-white mb-3">الموقع تحت الصيانة يرجي الانتظار وعدم الطلب حاليا</h1>
+    <p class="text-sm text-gray-400 max-w-md leading-relaxed mb-6">
+      نعمل حالياً على إنجاز بعض أعمال الصيانة والتحديثات لضمان تقديم أفضل خدمة. يرجى المتابعة لاحقاً.
+    </p>
+    <a href="https://t.me/Capitano_Store_bot" target="_blank" 
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg">
+      <i class="fa-brands fa-telegram text-lg"></i>
+      <span>التواصل عبر بوت التليجرام</span>
+    </a>
+  </div>
 
   <!-- Header / Navigation -->
   <header class="sticky top-0 z-50 glass-card border-b border-gray-800/80 mb-8">
@@ -404,10 +420,32 @@
     const screenshotInput = document.getElementById('screenshot');
 
     // Init App
-    function init() {
+    async function init() {
+      await checkMaintenance();
       renderGamesTabs();
       switchGame('PUBG');
       setupFileInput();
+      
+      // Periodically check maintenance status every 15 seconds
+      setInterval(checkMaintenance, 15000);
+    }
+
+    async function checkMaintenance() {
+      try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+        if (data.success && data.maintenance.web) {
+          document.getElementById('maintenanceOverlay').classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+          return true;
+        } else {
+          document.getElementById('maintenanceOverlay').classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+          return false;
+        }
+      } catch (e) {
+        return false;
+      }
     }
 
     function renderGamesTabs() {
@@ -508,7 +546,7 @@
     }
 
     function removeImage(e) {
-      e.stopPropagation();
+      if (e) e.stopPropagation();
       screenshotInput.value = '';
       document.getElementById('uploadPrompt').classList.remove('hidden');
       document.getElementById('previewArea').classList.add('hidden');
@@ -525,6 +563,10 @@
     // Form Validation & Submission
     document.getElementById('orderForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      // Check maintenance before sending
+      const isMaint = await checkMaintenance();
+      if (isMaint) return;
 
       let isValid = true;
 
@@ -578,9 +620,12 @@
           document.getElementById('orderForm').reset();
           selectedPackData = null;
           document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
-          removeImage(e);
+          removeImage(null);
         } else {
           showToast('❌ ' + data.message, 'error');
+          if (data.message && data.message.includes('الصيانة')) {
+            checkMaintenance();
+          }
         }
       } catch (err) {
         showToast('❌ حدث خطأ في الاتصال بالسيرفر، حاول مجدداً', 'error');
