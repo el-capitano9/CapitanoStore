@@ -19,6 +19,28 @@ if (!fs.existsSync('./uploads')) {
   fs.mkdirSync('./uploads');
 }
 
+// Maintenance File Path & Logic
+const MAINTENANCE_FILE = path.join(__dirname, 'maintenance.json');
+
+function getMaintenanceState() {
+  try {
+    if (fs.existsSync(MAINTENANCE_FILE)) {
+      return JSON.parse(fs.readFileSync(MAINTENANCE_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.error('❌ خطأ في قراءة ملف الصيانة:', e);
+  }
+  return { bot: false, web: false };
+}
+
+function setMaintenanceState(state) {
+  try {
+    fs.writeFileSync(MAINTENANCE_FILE, JSON.stringify(state, null, 2), 'utf8');
+  } catch (e) {
+    console.error('❌ خطأ في كتابة ملف الصيانة:', e);
+  }
+}
+
 // Multer Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, './uploads'),
@@ -36,6 +58,18 @@ app.use(express.static('public'));
 const adminBot = new Telegraf(ADMIN_BOT_TOKEN);
 const userBot = new Telegraf(USER_BOT_TOKEN);
 userBot.use(session());
+
+// Middleware - Check Bot Maintenance
+userBot.use(async (ctx, next) => {
+  const maint = getMaintenanceState();
+  if (maint.bot) {
+    if (ctx.callbackQuery) {
+      await ctx.answerCbQuery('⚠️ البوت تحت الصيانة حالياً', { show_alert: true });
+    }
+    return ctx.reply('البوت تحت الصيانة يرجي الانتظار وعدم الطلب حاليا');
+  }
+  return next();
+});
 
 // Detailed Games Catalog
 const GAMES_CATALOG = {
@@ -104,7 +138,7 @@ async function sendOrderToAdmin(orderData) {
   const time = new Date().toLocaleString('ar-EG', { timeZone: 'Africa/Cairo' });
 
   const caption = 
-`🛍️ *طلب شحن جديد جديد!*
+`🛍️ *طلب شحن جديد!*
 ━━━━━━━━━━━━━━━━━━
 🎮 *اللعبة:* ${game}
 📦 *الباقة:* ${pack}
@@ -124,6 +158,11 @@ async function sendOrderToAdmin(orderData) {
     ]);
   }
 
+  // Add Maintenance Control Button to Admin Notification
+  inlineKeyboard.push([
+    Markup.button.callback('⚙️ لوحة التحكم بالصيانة', 'admin_maint_menu')
+  ]);
+
   try {
     await adminBot.telegram.sendPhoto(ADMIN_CHAT_ID, { source: fs.createReadStream(filePath) }, {
       caption,
@@ -137,7 +176,74 @@ async function sendOrderToAdmin(orderData) {
   }
 }
 
-// Admin Action Buttons Callbacks
+// Admin Maintenance Menu Handler Helper
+async function sendMaintenanceMenu(ctx) {
+  const maint = getMaintenanceState();
+  const text = `⚙️ *لوحة التحكم في حالة الصيانة*
+
+🤖 *البوت:* ${maint.bot ? '🔴 متوقف (تحت الصيانة)' : '🟢 يعمل بنجاح'}
+🌐 *الموقع:* ${maint.web ? '🔴 متوقف (تحت الصيانة)' : '🟢 يعمل بنجاح'}
+
+اختر الإجراء المطلوب لتغيير حالة النظام:`;
+
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback(`${maint.bot ? '🟢 تشغيل البوت' : '🔴 إيقاف البوت (صيانة)'}`, 'toggle_maint_bot')],
+    [Markup.button.callback(`${maint.web ? '🟢 تشغيل الموقع' : '🔴 إيقاف الموقع (صيانة)'}`, 'toggle_maint_web')],
+    [Markup.button.callback(`${(maint.bot && maint.web) ? '🟢 تشغيل الاثنين' : '⛔ إيقاف الاثنين (صيانة)'}`, 'toggle_maint_both')],
+    [Markup.button.callback('❌ إغلاق', 'close_maint_menu')]
+  ]);
+
+  if (ctx.callbackQuery) {
+    await ctx.editMessageText(text, { parse_mode: 'Markdown', ...keyboard }).catch(async () => {
+      await ctx.reply(text, { parse_mode: 'Markdown', ...keyboard });
+    });
+  } else {
+    await ctx.reply(text, { parse_mode: 'Markdown', ...keyboard });
+  }
+}
+
+// Admin Commands & Actions
+adminBot.command(['maintenance', 'admin'], async (ctx) => {
+  await sendMaintenanceMenu(ctx);
+});
+
+adminBot.action('admin_maint_menu', async (ctx) => {
+  await ctx.answerCbQuery();
+  await sendMaintenanceMenu(ctx);
+});
+
+adminBot.action('toggle_maint_bot', async (ctx) => {
+  const maint = getMaintenanceState();
+  maint.bot = !maint.bot;
+  setMaintenanceState(maint);
+  await ctx.answerCbQuery(`تم ${maint.bot ? 'تفعيل' : 'إلغاء'} صيانة البوت ✅`);
+  await sendMaintenanceMenu(ctx);
+});
+
+adminBot.action('toggle_maint_web', async (ctx) => {
+  const maint = getMaintenanceState();
+  maint.web = !maint.web;
+  setMaintenanceState(maint);
+  await ctx.answerCbQuery(`تم ${maint.web ? 'تفعيل' : 'إلغاء'} صيانة الموقع ✅`);
+  await sendMaintenanceMenu(ctx);
+});
+
+adminBot.action('toggle_maint_both', async (ctx) => {
+  const maint = getMaintenanceState();
+  const target = !(maint.bot && maint.web);
+  maint.bot = target;
+  maint.web = target;
+  setMaintenanceState(maint);
+  await ctx.answerCbQuery(`تم ${target ? 'تفعيل' : 'إلغاء'} صيانة البوت والموقع معاً ✅`);
+  await sendMaintenanceMenu(ctx);
+});
+
+adminBot.action('close_maint_menu', async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.deleteMessage().catch(() => {});
+});
+
+// Admin Action Buttons Callbacks (Approve / Reject)
 adminBot.action(/approve_(.*)/, async (ctx) => {
   const targetUserId = ctx.match[1];
   try {
@@ -160,9 +266,20 @@ adminBot.action(/reject_(.*)/, async (ctx) => {
   }
 });
 
+// Website Status API Route
+app.get('/api/status', (req, res) => {
+  const maint = getMaintenanceState();
+  res.json({ success: true, maintenance: maint });
+});
+
 // Website API Route
 app.post('/api/submit', upload.single('screenshot'), async (req, res) => {
   try {
+    const maint = getMaintenanceState();
+    if (maint.web) {
+      return res.status(503).json({ success: false, message: 'الموقع تحت الصيانة يرجي الانتظار وعدم الطلب حاليا' });
+    }
+
     const { game, pack, price, account_id, notes } = req.body;
     const file = req.file;
 
