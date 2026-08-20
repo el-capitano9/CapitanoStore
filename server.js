@@ -51,7 +51,7 @@ const upload = multer({ storage });
 // Initialize Express App
 const app = express();
 app.use(cors());
-app.اللعبةpress.json());
+app.use(express.json());
 app.use(express.static('public'));
 
 // Telegraf Admin Bot & User Bot
