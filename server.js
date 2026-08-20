@@ -45,7 +45,7 @@ const GAMES_CATALOG = {
       { label: '60 UC', price: 60 },
       { label: '300+25 UC', price: 245 },
       { label: '600+60 UC', price: 485 },
-      { label: '1500+300 UC', price: 1210 }
+      { label: '1500+300 UC', price: 1215 }
     ]
   },
   'fcmobile': {
