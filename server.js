@@ -100,7 +100,7 @@ userBot.use(session());
 
 // بيانات الألعاب (مختصرة للبوت)
 const GAMES_DATA = {
-  'PUBG': { packs: [{ label: '60 UC', price: 55 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }] },
+  'PUBG': { packs: [{ label: '60 UC', price: 60 }, { label: '300+25 UC', price: 245 }, { label: '600+60 UC', price: 485 }, { label: '1500+300 UC', price: 1210 }] },
   'FC Mobile': { packs: [{ label: '40+8 Points', price: 30 }, { label: '100+20 Points', price: 70 }, { label: '520+104 Points', price: 270 }, { label: '1070+214 Points', price: 520 }] },
   'Call of Duty': { packs: [{ label: '30 CP', price: 30 }, { label: '80 CP', price: 55 }, { label: '420 CP', price: 260 }, { label: '880 CP', price: 510 }] },
   'Blood Strike MAX': { packs: [{ label: '50+1 Golds', price: 30 }, { label: '100+5 Golds', price: 55 }, { label: '300+20 Golds', price: 150 }, { label: '500+40 Golds', price: 240 }, { label: '1000+100 Golds', price: 470 }] },
