@@ -77,18 +77,21 @@ const GAMES_CATALOG = {
     name: 'PUBG Mobile 🔫',
     packs: [
       { label: '60 UC', price: 60 },
-      { label: '300+25 UC', price: 245 },
-      { label: '600+60 UC', price: 485 },
-      { label: '1500+300 UC', price: 1215 }
+      { label: '325 UC', price: 245 },
+      { label: '660 UC', price: 485 },
+      { label: '1800 UC', price: 1215 },
+      { label: '3850 UC', price: 2395 },
+      { label: '8100 UC', price: 4795 }
     ]
   },
   'fcmobile': {
     name: 'EA SPORTS FC Mobile ⚽',
     packs: [
       { label: '48 FC Points', price: 30 },
-      { label: '120 FC Points', price: 70 },
-      { label: '624 FC Points', price: 270 },
-      { label: '1284 FC Points', price: 520 }
+      { label: '100 FC Points', price: 70 },
+      { label: '520 FC Points', price: 270 },
+      { label: '1070 FC Points', price: 525 },
+      { label: '2200 FC Points', price: 1025 },
     ]
   },
   'cod': {
@@ -114,9 +117,10 @@ const GAMES_CATALOG = {
     name: 'Free Fire 🔥',
     packs: [
       { label: '100 Diamonds', price: 65 },
-      { label: '210 Diamonds', price: 120 },
-      { label: '530 Diamonds', price: 280 },
-      { label: '1080 Diamonds', price: 555 }
+      { label: '210 Diamonds', price: 125 },
+      { label: '530 Diamonds', price: 285 },
+      { label: '1080 Diamonds', price: 555 },
+      { label: '2200 Diamonds', price: 1090 }
     ]
   },
   'telegram': {
